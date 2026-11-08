@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Base-Proyecto/Base-Proyecto.csproj" />
+  <Project Path="Orientada_a_Objetos/Orientada_a_Objetos.csproj" Id="0c58b91d-45ac-4354-85c2-1f7fa9474452" />
 </Solution>
