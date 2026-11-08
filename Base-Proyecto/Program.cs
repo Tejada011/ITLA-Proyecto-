@@ -14,6 +14,8 @@ namespace RegistroEmpresa
         static Dictionary<int, DateTime> entradas = new Dictionary<int, DateTime>();
         static Dictionary<int, DateTime> salidas = new Dictionary<int, DateTime>();
 
+        static int siguienteIdVisita = 1;
+
         static void Main(string[] args)
         {
             DisplayHeader();
@@ -45,6 +47,9 @@ namespace RegistroEmpresa
                             ListarVisitas();
                             break;
                         case 6:
+                            EliminarVisita();
+                            break;
+                        case 7:
                             wantToContinue = false;
                             Console.WriteLine("Cerrando el sistema...");
                             break;
@@ -53,9 +58,13 @@ namespace RegistroEmpresa
                             break;
                     }
                 }
-                catch (Exception)
+                catch (FormatException)
                 {
                     Console.WriteLine("\nError: Debe ingresar un numero entero valido para el menu.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\nError inesperado: {ex.Message}");
                 }
 
                 if (wantToContinue == true)
@@ -76,12 +85,13 @@ namespace RegistroEmpresa
         static void DisplayMenu()
         {
             Console.WriteLine("\n=== MENÚ PRINCIPAL ===");
-            Console.WriteLine("1. Registrar Entrada ");
-            Console.WriteLine("2. Buscar Visitas ");
+            Console.WriteLine("1. Registrar Entrada");
+            Console.WriteLine("2. Buscar Visitas");
             Console.WriteLine("3. Modificar Informacion");
-            Console.WriteLine("4. Registrar Salida (Eliminar)");
+            Console.WriteLine("4. Registrar Salida");
             Console.WriteLine("5. Listar Todas las Visitas");
-            Console.WriteLine("6. Salir");
+            Console.WriteLine("6. Eliminar Visita");
+            Console.WriteLine("7. Salir");
             Console.Write("Seleccione una opción: ");
         }
 
@@ -92,13 +102,23 @@ namespace RegistroEmpresa
 
             try
             {
-                int nuevoIdVisita = idsVisitas.Count + 1;
-
                 Console.Write("Nombre del visitante: ");
                 string nombreVis = Console.ReadLine();
 
+                if (nombreVis.Trim() == "")
+                {
+                    Console.WriteLine("El nombre del visitante no puede estar vacio.");
+                    return;
+                }
+
                 Console.Write("ID Numérico del Empleado que lo recibe: ");
                 int idEmp = Convert.ToInt32(Console.ReadLine());
+
+                if (idEmp <= 0)
+                {
+                    Console.WriteLine("El ID del empleado debe ser mayor que cero.");
+                    return;
+                }
 
                 if (nombresEmpleados.ContainsKey(idEmp) == false)
                 {
@@ -106,14 +126,23 @@ namespace RegistroEmpresa
                     Console.Write("Nombre del Empleado: ");
                     string nombreEmp = Console.ReadLine();
 
+                    if (nombreEmp.Trim() == "")
+                    {
+                        Console.WriteLine("El nombre del empleado no puede estar vacio.");
+                        return;
+                    }
+
                     idsEmpleados.Add(idEmp);
                     nombresEmpleados.Add(idEmp, nombreEmp);
                 }
+
+                int nuevoIdVisita = siguienteIdVisita;
 
                 idsVisitas.Add(nuevoIdVisita);
                 visitantes.Add(nuevoIdVisita, nombreVis);
                 empleadoDeVisita.Add(nuevoIdVisita, idEmp);
                 entradas.Add(nuevoIdVisita, DateTime.Now);
+                siguienteIdVisita++;
 
                 Console.WriteLine($"\n¡Visita registrada! Ticket de visita asignado: {nuevoIdVisita}");
             }
@@ -129,7 +158,8 @@ namespace RegistroEmpresa
             Console.WriteLine("--- BUSCAR VISITAS (CRITERIOS) ---");
             Console.WriteLine("1. Buscar por Ticket de Visita");
             Console.WriteLine("2. Buscar por Nombre del Visitante");
-            Console.Write("Seleccione  (1-2): ");
+            Console.WriteLine("3. Ver visitas que siguen en el edificio");
+            Console.Write("Seleccione (1-3): ");
             string criterio = Console.ReadLine();
 
             if (criterio == "1")
@@ -200,6 +230,31 @@ namespace RegistroEmpresa
                     Console.WriteLine("No se encontraron registros.");
                 }
             }
+            else if (criterio == "3")
+            {
+                bool encontrado = false;
+
+                for (int i = 0; i < idsVisitas.Count; i++)
+                {
+                    int id = idsVisitas[i];
+
+                    if (salidas.ContainsKey(id) == false)
+                    {
+                        encontrado = true;
+                        int idEmp = empleadoDeVisita[id];
+                        Console.WriteLine($"Ticket: {id} | Visitante: {visitantes[id]} | Empleado: {nombresEmpleados[idEmp]} | Entrada: {entradas[id].ToString("hh:mm tt")}");
+                    }
+                }
+
+                if (encontrado == false)
+                {
+                    Console.WriteLine("No hay visitas dentro del edificio.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Criterio no valido.");
+            }
         }
 
         static void ModificarVisita()
@@ -245,7 +300,7 @@ namespace RegistroEmpresa
         static void RegistrarSalida()
         {
             Console.Clear();
-            Console.WriteLine("--- REGISTRAR SALIDA (ELIMINAR LOGICO) ---");
+            Console.WriteLine("--- REGISTRAR SALIDA ---");
 
             try
             {
@@ -274,6 +329,7 @@ namespace RegistroEmpresa
                 Console.WriteLine("Error: El ticket debe ser numerico.");
             }
         }
+
         static void ListarVisitas()
         {
             Console.Clear();
@@ -300,6 +356,37 @@ namespace RegistroEmpresa
                 }
 
                 Console.WriteLine($"Ticket: {id} | Visitante: {visitantes[id]} | Empleado: {nombresEmpleados[idEmp]} | Entrada: {entradas[id].ToString("hh:mm tt")} | Salida: {horaSalidaTxt} | Estado: {estado}");
+            }
+        }
+
+        static void EliminarVisita()
+        {
+            Console.Clear();
+            Console.WriteLine("--- ELIMINAR VISITA ---");
+
+            try
+            {
+                Console.Write("Ingrese el Ticket de la visita a eliminar: ");
+                int idBuscado = Convert.ToInt32(Console.ReadLine());
+
+                if (visitantes.ContainsKey(idBuscado) == true)
+                {
+                    idsVisitas.Remove(idBuscado);
+                    visitantes.Remove(idBuscado);
+                    empleadoDeVisita.Remove(idBuscado);
+                    entradas.Remove(idBuscado);
+                    salidas.Remove(idBuscado);
+
+                    Console.WriteLine("Visita eliminada correctamente.");
+                }
+                else
+                {
+                    Console.WriteLine("Ticket no encontrado.");
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error: El ticket debe ser numerico.");
             }
         }
     }
