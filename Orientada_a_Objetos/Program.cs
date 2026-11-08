@@ -8,13 +8,16 @@ namespace Orientada_a_Objetos
         static List<Visita> visitas = new List<Visita>();
         static Dictionary<string, Empleado> empleados = new Dictionary<string, Empleado>();
         static Dictionary<string, Visitante> visitantes = new Dictionary<string, Visitante>();
+
         static int siguienteIdVisita = 1;
 
         static void Main(string[] args)
         {
+            DisplayHeader();
+
             bool wantToContinue = true;
 
-            while (wantToContinue)
+            while (wantToContinue == true)
             {
                 try
                 {
@@ -23,31 +26,43 @@ namespace Orientada_a_Objetos
 
                     switch (chosenOption)
                     {
-                        case 1: RegistrarEntrada(); break;
-                        case 2: BuscarVisitas(); break;
-                        case 3: ModificarVisita(); break;
-                        case 4: RegistrarSalida(); break;
-                        case 5: ListarVisitas(); break;
-                        case 6: EliminarVisita(); break;
+                        case 1:
+                            RegistrarEntrada();
+                            break;
+                        case 2:
+                            BuscarVisitas();
+                            break;
+                        case 3:
+                            ModificarVisita();
+                            break;
+                        case 4:
+                            RegistrarSalida();
+                            break;
+                        case 5:
+                            ListarVisitas();
+                            break;
+                        case 6:
+                            EliminarVisita();
+                            break;
                         case 7:
                             wantToContinue = false;
                             Console.WriteLine("Cerrando el sistema...");
                             break;
                         default:
-                            Console.WriteLine("Opción no válida. Intente de nuevo.");
+                            Console.WriteLine("Opcion no valida. Intente de nuevo.");
                             break;
                     }
                 }
                 catch (FormatException)
                 {
-                    Console.WriteLine("\nError: Debe ingresar un número entero válido para el menú.");
+                    Console.WriteLine("\nError: Debe ingresar un numero entero valido para el menu.");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\nError inesperado: {ex.Message}");
                 }
 
-                if (wantToContinue)
+                if (wantToContinue == true)
                 {
                     Console.WriteLine("\nPresione ENTER para continuar...");
                     Console.ReadLine();
@@ -56,19 +71,44 @@ namespace Orientada_a_Objetos
             }
         }
 
-        static void DisplayMenu()
+        static void DisplayHeader()
         {
             Console.WriteLine("=== CONTROL DE ACCESO ===");
-            Console.WriteLine("Sistema de gestión de visitas (POO)");
+            Console.WriteLine("Sistema de gestion de visitas");
+        }
+
+        static void DisplayMenu()
+        {
             Console.WriteLine("\n=== MENÚ PRINCIPAL ===");
             Console.WriteLine("1. Registrar Entrada");
             Console.WriteLine("2. Buscar Visitas");
-            Console.WriteLine("3. Modificar Información");
+            Console.WriteLine("3. Modificar Informacion");
             Console.WriteLine("4. Registrar Salida");
             Console.WriteLine("5. Listar Todas las Visitas");
             Console.WriteLine("6. Eliminar Visita");
             Console.WriteLine("7. Salir");
             Console.Write("Seleccione una opción: ");
+        }
+
+        static Visita BuscarVisitaPorTicket(int ticket)
+        {
+            for (int i = 0; i < visitas.Count; i++)
+            {
+                if (visitas[i].IdVisita == ticket)
+                {
+                    return visitas[i];
+                }
+            }
+            return null;
+        }
+
+        static string ObtenerEstado(Visita visita)
+        {
+            if (visita.Activa == true)
+            {
+                return "En el edificio";
+            }
+            return "Fuera";
         }
 
         static void RegistrarEntrada()
@@ -78,51 +118,76 @@ namespace Orientada_a_Objetos
 
             try
             {
-                Console.Write("Cédula/ID del Visitante: ");
+                Console.Write("Cédula/ID del visitante: ");
                 string idVis = Console.ReadLine().Trim();
 
-                if (string.IsNullOrEmpty(idVis))
+                if (idVis == "")
                 {
-                    Console.WriteLine("El ID del visitante no puede estar vacío.");
+                    Console.WriteLine("El ID del visitante no puede estar vacio.");
                     return;
                 }
 
-                if (!visitantes.ContainsKey(idVis))
+                if (visitantes.ContainsKey(idVis) == false)
                 {
                     Console.WriteLine("Visitante nuevo detectado. Ingrese sus datos:");
-                    Console.Write("Nombre: "); string nomVis = Console.ReadLine();
-                    Console.Write("Apellido: "); string apeVis = Console.ReadLine();
-                    Console.Write("Empresa: "); string empVis = Console.ReadLine();
 
-                    visitantes.Add(idVis, new Visitante(idVis, nomVis, apeVis, empVis));
+                    Console.Write("Nombre: ");
+                    string nombreVis = Console.ReadLine().Trim();
+                    Console.Write("Apellido: ");
+                    string apellidoVis = Console.ReadLine().Trim();
+                    Console.Write("Empresa: ");
+                    string empresaVis = Console.ReadLine().Trim();
+
+                    if (nombreVis == "" || apellidoVis == "" || empresaVis == "")
+                    {
+                        Console.WriteLine("Los datos del visitante no pueden estar vacios.");
+                        return;
+                    }
+
+                    visitantes.Add(idVis, new Visitante(idVis, nombreVis, apellidoVis, empresaVis));
                 }
 
-                Console.Write("ID/Código del Empleado que lo recibe: ");
-                string idEmp = Console.ReadLine().Trim();
+                Console.Write("ID Numérico del Empleado que lo recibe: ");
+                int idEmpNumero = Convert.ToInt32(Console.ReadLine());
 
-                if (string.IsNullOrEmpty(idEmp))
+                if (idEmpNumero <= 0)
                 {
-                    Console.WriteLine("El ID del empleado no puede estar vacío.");
+                    Console.WriteLine("El ID del empleado debe ser mayor que cero.");
                     return;
                 }
 
-                if (!empleados.ContainsKey(idEmp))
+                string idEmp = idEmpNumero.ToString();
+
+                if (empleados.ContainsKey(idEmp) == false)
                 {
                     Console.WriteLine("Empleado nuevo detectado. Ingrese sus datos:");
-                    Console.Write("Nombre: "); string nomEmp = Console.ReadLine();
-                    Console.Write("Apellido: "); string apeEmp = Console.ReadLine();
-                    Console.Write("Departamento: "); string depEmp = Console.ReadLine();
 
-                    empleados.Add(idEmp, new Empleado(idEmp, nomEmp, apeEmp, depEmp));
+                    Console.Write("Nombre: ");
+                    string nombreEmp = Console.ReadLine().Trim();
+                    Console.Write("Apellido: ");
+                    string apellidoEmp = Console.ReadLine().Trim();
+                    Console.Write("Departamento: ");
+                    string departamentoEmp = Console.ReadLine().Trim();
+
+                    if (nombreEmp == "" || apellidoEmp == "" || departamentoEmp == "")
+                    {
+                        Console.WriteLine("Los datos del empleado no pueden estar vacios.");
+                        return;
+                    }
+
+                    empleados.Add(idEmp, new Empleado(idEmp, nombreEmp, apellidoEmp, departamentoEmp));
                 }
 
-                visitas.Add(new Visita(siguienteIdVisita, visitantes[idVis], empleados[idEmp]));
-                Console.WriteLine($"\n¡Visita registrada! Ticket asignado: {siguienteIdVisita}");
+                int nuevoIdVisita = siguienteIdVisita;
+
+                visitas.Add(new Visita(nuevoIdVisita, visitantes[idVis], empleados[idEmp]));
                 siguienteIdVisita++;
+
+                Console.WriteLine($"\n¡Visita registrada! Ticket de visita asignado: {nuevoIdVisita}");
             }
             catch (Exception)
             {
-                Console.WriteLine("Error: Entrada de datos inválida.");
+                Console.WriteLine("Error: Entrada de datos invalida.");
             }
         }
 
@@ -132,7 +197,7 @@ namespace Orientada_a_Objetos
             Console.WriteLine("--- BUSCAR VISITAS (CRITERIOS) ---");
             Console.WriteLine("1. Buscar por Ticket de Visita");
             Console.WriteLine("2. Buscar por Nombre del Visitante");
-            Console.WriteLine("3. Ver visitas activas en el edificio");
+            Console.WriteLine("3. Ver visitas que siguen en el edificio");
             Console.Write("Seleccione (1-3): ");
             string criterio = Console.ReadLine();
 
@@ -140,22 +205,29 @@ namespace Orientada_a_Objetos
             {
                 try
                 {
-                    Console.Write("Ingrese el número de ticket a buscar: ");
+                    Console.Write("Ingrese el numero de ticket a buscar: ");
                     int idBuscado = Convert.ToInt32(Console.ReadLine());
-                    Visita v = visitas.Find(x => x.IdVisita == idBuscado);
 
-                    if (v != null)
+                    Visita visita = BuscarVisitaPorTicket(idBuscado);
+
+                    if (visita != null)
                     {
                         Console.WriteLine("\n[Resultado Encontrado]");
-                        Console.WriteLine($"Ticket ID: {v.IdVisita}");
-                        Console.WriteLine($"Visitante: {v.VisitanteAsignado.Nombre} {v.VisitanteAsignado.Apellido} ({v.VisitanteAsignado.Empresa})");
-                        Console.WriteLine($"Atendido por: {v.EmpleadoAsignado.Nombre} {v.EmpleadoAsignado.Apellido} - Depto: {v.EmpleadoAsignado.Departamento}");
-                        Console.WriteLine($"Entrada: {v.HoraEntradaTxt} | Salida: {v.HoraSalidaTxt}");
-                        Console.WriteLine($"Estado: {(v.Activa ? "En el edificio" : "Fuera")}");
+                        Console.WriteLine($"Ticket ID: {visita.IdVisita}");
+                        Console.WriteLine($"Visitante: {visita.VisitanteAsignado.Nombre} {visita.VisitanteAsignado.Apellido} ({visita.VisitanteAsignado.Empresa})");
+                        Console.WriteLine($"Atendido por: [{visita.EmpleadoAsignado.Id}] {visita.EmpleadoAsignado.Nombre} {visita.EmpleadoAsignado.Apellido} - Depto: {visita.EmpleadoAsignado.Departamento}");
+                        Console.WriteLine($"Entrada: {visita.HoraEntradaTxt} | Salida: {visita.HoraSalidaTxt}");
+                        Console.WriteLine($"Estado: {ObtenerEstado(visita)}");
                     }
-                    else Console.WriteLine("No existe ninguna visita con ese código.");
+                    else
+                    {
+                        Console.WriteLine("No existe ninguna visita con ese codigo.");
+                    }
                 }
-                catch { Console.WriteLine("Error: El ticket debe ser numérico."); }
+                catch (Exception)
+                {
+                    Console.WriteLine("Error: El ticket debe ser numerico.");
+                }
             }
             else if (criterio == "2")
             {
@@ -163,28 +235,45 @@ namespace Orientada_a_Objetos
                 string nombreBuscado = Console.ReadLine().ToLower();
                 bool encontrado = false;
 
-                foreach (var v in visitas)
+                for (int i = 0; i < visitas.Count; i++)
                 {
-                    if (v.VisitanteAsignado.Nombre.ToLower().Contains(nombreBuscado) || v.VisitanteAsignado.Apellido.ToLower().Contains(nombreBuscado))
+                    Visita visita = visitas[i];
+
+                    if (visita.VisitanteAsignado.Nombre.ToLower().Contains(nombreBuscado) == true || visita.VisitanteAsignado.Apellido.ToLower().Contains(nombreBuscado) == true)
                     {
                         encontrado = true;
-                        Console.WriteLine($"Ticket: {v.IdVisita} | Visitante: {v.VisitanteAsignado.Nombre} {v.VisitanteAsignado.Apellido} | Estado: {(v.Activa ? "En el edificio" : "Fuera")}");
+                        Console.WriteLine($"Ticket: {visita.IdVisita} | Visitante: {visita.VisitanteAsignado.Nombre} {visita.VisitanteAsignado.Apellido} | Empleado: {visita.EmpleadoAsignado.Nombre} - Estado: {ObtenerEstado(visita)}");
                     }
                 }
-                if (!encontrado) Console.WriteLine("No se encontraron registros.");
+
+                if (encontrado == false)
+                {
+                    Console.WriteLine("No se encontraron registros.");
+                }
             }
             else if (criterio == "3")
             {
                 bool encontrado = false;
-                foreach (var v in visitas)
+
+                for (int i = 0; i < visitas.Count; i++)
                 {
-                    if (v.Activa)
+                    Visita visita = visitas[i];
+
+                    if (visita.Activa == true)
                     {
                         encontrado = true;
-                        Console.WriteLine($"Ticket: {v.IdVisita} | Visitante: {v.VisitanteAsignado.Nombre} {v.VisitanteAsignado.Apellido} | Entrada: {v.HoraEntradaTxt}");
+                        Console.WriteLine($"Ticket: {visita.IdVisita} | Visitante: {visita.VisitanteAsignado.Nombre} {visita.VisitanteAsignado.Apellido} | Empleado: {visita.EmpleadoAsignado.Nombre} | Entrada: {visita.HoraEntradaTxt}");
                     }
                 }
-                if (!encontrado) Console.WriteLine("No hay visitas dentro del edificio.");
+
+                if (encontrado == false)
+                {
+                    Console.WriteLine("No hay visitas dentro del edificio.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Criterio no valido.");
             }
         }
 
@@ -197,23 +286,36 @@ namespace Orientada_a_Objetos
             {
                 Console.Write("Ingrese el Ticket de la visita a modificar: ");
                 int idBuscado = Convert.ToInt32(Console.ReadLine());
-                Visita v = visitas.Find(x => x.IdVisita == idBuscado);
 
-                if (v != null)
+                Visita visita = BuscarVisitaPorTicket(idBuscado);
+
+                if (visita != null)
                 {
-                    Console.Write($"Nuevo Nombre Visitante (actual: {v.VisitanteAsignado.Nombre}): ");
+                    Console.Write($"Nuevo Nombre Visitante (actual: {visita.VisitanteAsignado.Nombre}): ");
                     string nuevoNombre = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(nuevoNombre)) v.VisitanteAsignado.Nombre = nuevoNombre;
+                    if (nuevoNombre.Trim() != "")
+                    {
+                        visita.VisitanteAsignado.Nombre = nuevoNombre.Trim();
+                    }
 
-                    Console.Write($"Nuevo Nombre del Empleado (actual: {v.EmpleadoAsignado.Nombre}): ");
+                    Console.Write($"Nuevo Nombre del Empleado (actual: {visita.EmpleadoAsignado.Nombre}): ");
                     string nuevoNombreEmp = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(nuevoNombreEmp)) v.EmpleadoAsignado.Nombre = nuevoNombreEmp;
+                    if (nuevoNombreEmp.Trim() != "")
+                    {
+                        visita.EmpleadoAsignado.Nombre = nuevoNombreEmp.Trim();
+                    }
 
-                    Console.WriteLine("¡Información actualizada exitosamente!");
+                    Console.WriteLine("¡Informacion actualizada exitosamente!");
                 }
-                else Console.WriteLine("El ticket ingresado no existe.");
+                else
+                {
+                    Console.WriteLine("El ticket ingresado no existe.");
+                }
             }
-            catch { Console.WriteLine("Error: Ingrese un número de ticket válido."); }
+            catch (Exception)
+            {
+                Console.WriteLine("Error: Ingrese un numero de ticket valido.");
+            }
         }
 
         static void RegistrarSalida()
@@ -225,53 +327,78 @@ namespace Orientada_a_Objetos
             {
                 Console.Write("Ingrese el Ticket de la Visita para marcar salida: ");
                 int idBuscado = Convert.ToInt32(Console.ReadLine());
-                Visita v = visitas.Find(x => x.IdVisita == idBuscado);
 
-                if (v != null)
+                Visita visita = BuscarVisitaPorTicket(idBuscado);
+
+                if (visita != null)
                 {
-                    if (v.Activa)
+                    if (visita.Activa == true)
                     {
-                        v.HoraSalidaTxt = DateTime.Now.ToString("hh:mm tt");
-                        v.Activa = false;
-                        Console.WriteLine($"Salida marcada de forma correcta a las {v.HoraSalidaTxt}");
+                        visita.HoraSalidaTxt = DateTime.Now.ToString("hh:mm tt");
+                        visita.Activa = false;
+                        Console.WriteLine($"Salida marcada de forma correcta a las {visita.HoraSalidaTxt}");
                     }
-                    else Console.WriteLine($"Este ticket ya registró su salida a las: {v.HoraSalidaTxt}");
+                    else
+                    {
+                        Console.WriteLine($"Este ticket ya registro su salida a las: {visita.HoraSalidaTxt}");
+                    }
                 }
-                else Console.WriteLine("Ticket no encontrado.");
+                else
+                {
+                    Console.WriteLine("Ticket no encontrado.");
+                }
             }
-            catch { Console.WriteLine("Error: El ticket debe ser numérico."); }
+            catch (Exception)
+            {
+                Console.WriteLine("Error: El ticket debe ser numerico.");
+            }
         }
+
         static void ListarVisitas()
         {
             Console.Clear();
             Console.WriteLine("--- LISTA DE VISITAS ---");
+
             if (visitas.Count == 0)
             {
                 Console.WriteLine("No hay visitas registradas.");
                 return;
             }
-            foreach (var v in visitas)
+
+            for (int i = 0; i < visitas.Count; i++)
             {
-                Console.WriteLine($"Ticket: {v.IdVisita} | Visitante: {v.VisitanteAsignado.Nombre} {v.VisitanteAsignado.Apellido} | Empleado: {v.EmpleadoAsignado.Nombre} | Entrada: {v.HoraEntradaTxt} | Salida: {v.HoraSalidaTxt} | Estado: {(v.Activa ? "En el edificio" : "Fuera")}");
+                Visita visita = visitas[i];
+
+                Console.WriteLine($"Ticket: {visita.IdVisita} | Visitante: {visita.VisitanteAsignado.Nombre} {visita.VisitanteAsignado.Apellido} | Empleado: {visita.EmpleadoAsignado.Nombre} | Entrada: {visita.HoraEntradaTxt} | Salida: {visita.HoraSalidaTxt} | Estado: {ObtenerEstado(visita)}");
             }
         }
+
         static void EliminarVisita()
         {
             Console.Clear();
             Console.WriteLine("--- ELIMINAR VISITA ---");
+
             try
             {
                 Console.Write("Ingrese el Ticket de la visita a eliminar: ");
                 int idBuscado = Convert.ToInt32(Console.ReadLine());
-                Visita v = visitas.Find(x => x.IdVisita == idBuscado);
-                if (v != null)
+
+                Visita visita = BuscarVisitaPorTicket(idBuscado);
+
+                if (visita != null)
                 {
-                    visitas.Remove(v);
+                    visitas.Remove(visita);
                     Console.WriteLine("Visita eliminada correctamente.");
                 }
-                else Console.WriteLine("Ticket no encontrado.");
+                else
+                {
+                    Console.WriteLine("Ticket no encontrado.");
+                }
             }
-            catch { Console.WriteLine("Error: El ticket debe ser numérico."); }
+            catch (Exception)
+            {
+                Console.WriteLine("Error: El ticket debe ser numerico.");
+            }
         }
     }
 }
