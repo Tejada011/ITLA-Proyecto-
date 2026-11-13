@@ -11,6 +11,8 @@ namespace Orientada_a_Objetos
 
         static int siguienteIdVisita = 1;
 
+        static string connectionString = @"Server=DESKTOP-Q1OJ2CN\SQLEXPRESS;Database=ControlAccesoDB;Trusted_Connection=True;TrustServerCertificate=True;";
+
         static void Main(string[] args)
         {
             DisplayHeader();
